@@ -1,2 +1,6 @@
 bin
 obj
+src/client/src/**/*.js
+*.pem
+*.db
+*.pfx
