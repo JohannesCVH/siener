@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow col-6 px-4">
+        <div class="card shadow col-12 col-md-6 px-4">
             <div class="card-body">
                 <h3 class="text-center mb-4">Login</h3>
 
@@ -59,7 +59,7 @@
         
         try {
             const response = await axios.post<User>(
-                `${config.API_URL}/User/Login`,
+                `${config.API_URL}:${config.API_PORT}/api/User/Login`,
                 loginRequest
             );
             

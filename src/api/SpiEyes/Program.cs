@@ -12,20 +12,20 @@ internal class Program
 
         builder.Services.AddCors(options =>
         {
-           options.AddPolicy(name: "AllowAll", policy =>
-           {
+            options.AddPolicy(name: "AllowAll", policy =>
+            {
                 policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-           });
+            });
         });
 
         builder.Configuration.AddJsonFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SpiEyes/config.json"), optional: false, reloadOnChange: true);
         builder.Services.Configure<Config>(builder.Configuration.GetSection("Configuration"));
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlite());
-        
+        builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlite(connectionString));
+
         builder.Services.AddSingleton<ISharedDataService, SharedDataService>();
-        builder.Services.AddHostedService<FFmpegRtspReaderService>();
+        builder.Services.AddHostedService<CameraService>();
 
         var app = builder.Build();
         app.MapControllers();
@@ -34,12 +34,10 @@ internal class Program
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-            db.Database.EnsureDeleted();
             db.Database.EnsureCreated();
-            db.Database.Migrate();
             DbInitializer.Initialize(db);
         }
-        
+
         app.Run();
     }
 }

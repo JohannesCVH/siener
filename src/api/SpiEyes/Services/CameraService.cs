@@ -5,15 +5,15 @@ using SpiEyes.Utility;
 
 namespace SpiEyes.Services;
 
-public class FFmpegRtspReaderService : IHostedService
+public class CameraService : IHostedService
 {
     private readonly Config _config;
     private readonly ISharedDataService _sharedDataService;
-    public List<Camera> Cameras { get; set; }
+    public List<Camera>? Cameras { get; set; }
 
     private static bool LOG_FRAMES = false;
     
-    public FFmpegRtspReaderService(IOptions<Config> configOptions, ISharedDataService sharedDataService)
+    public CameraService(IOptions<Config> configOptions, ISharedDataService sharedDataService)
     {
         _config = configOptions.Value;
         _sharedDataService = sharedDataService;
@@ -54,14 +54,14 @@ public class FFmpegRtspReaderService : IHostedService
                 recordFormat = "fmp4",
                 recordPath = $"{streamsPath}/%path/Recordings/%Y-%m-%d_%H-%M-%S-%f",
                 recordSegmentDuration = "1m",
-                recordPartDuration = "1s"
+                recordPartDuration = "1s",
             };
 
             var camera = new Camera();
 
             var response = await client.PostAsJsonAsync(apiUrl, config);
             if (response.IsSuccessStatusCode)
-                Console.WriteLine($"ERROR: Camera [{_config.Cameras[i].Name}] | Couldn't push camera to MediaMTX.");
+                Console.WriteLine($"ERROR | [{nameof(CameraService)}: {_config.Cameras[i].Name}] | Couldn't push camera to MediaMTX.");
 
             camera.Name = _config.Cameras[i].Name;
             camera.FrameProc = frameProc;

@@ -32,6 +32,7 @@ a {
 
 .navbar {
     background-color: #333;
+    padding-top: env(safe-area-inset-top);
 }
 
 .card {
@@ -45,7 +46,12 @@ a {
     color: #ece5d8;
 }
 
-video {
+.stream-container {
+    min-height: 10vh;
     border-radius: 4px;
     box-shadow: 0 0 4px 1px #333;
+    background-color: #333;
+}
+.stream-container span {
+    color: #ece5d8;
 }

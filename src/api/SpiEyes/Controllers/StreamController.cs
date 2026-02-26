@@ -9,7 +9,7 @@ namespace SpiEyes.Controllers;
 public class StreamController : ControllerBase
 {   
     public ISharedDataService _sharedDataService { get; set; }
-    private readonly FFmpegRtspReaderService _fFmpegRtspReaderService;
+    private readonly CameraService _cameraService;
     
     public StreamController(ISharedDataService sharedDataService)
     {
@@ -41,7 +41,7 @@ public class StreamController : ControllerBase
     [HttpGet("Test")]
     public IActionResult Test(CancellationToken cancellationToken)
     {
-        _fFmpegRtspReaderService.StopAsync(cancellationToken);
+        _cameraService.StopAsync(cancellationToken);
         
         return Ok();
     }

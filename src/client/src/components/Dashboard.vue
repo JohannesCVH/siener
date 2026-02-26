@@ -19,7 +19,9 @@
     import axios from 'axios';
     import { useRouter } from 'vue-router';
     import { Camera } from '../models/Camera';
-    import { onMounted, ref } from 'vue';
+    import { inject, onMounted, ref } from 'vue';
+
+    const config: any = inject('config');
 
     const router = useRouter();
 
@@ -27,7 +29,7 @@
 
     const fetchStreams = async (): Promise<void> => {
         try {
-            const res = await axios.get<Camera[]>('https://192.168.68.110:5001/api/Dashboard/Streams');
+            const res = await axios.get<Camera[]>(`${config.API_URL}:${config.API_PORT}/api/Dashboard/Streams`);
             
             res.data.forEach(camera => {
                 camerasRef.value.push(new Camera(camera.name))
@@ -43,7 +45,7 @@
 
     const fetchThumbnail = async (cameraName: string): Promise<Blob> => {
         try {
-            const res = await axios.get<Blob>(`https://192.168.68.110:5001/api/Dashboard/GetThumbnail/${cameraName}`, {
+            const res = await axios.get<Blob>(`${config.API_URL}:${config.API_PORT}/api/Dashboard/GetThumbnail/${cameraName}`, {
                 responseType: 'blob'
             });
 
@@ -58,7 +60,6 @@
         const promises = camerasRef.value.map(async (cam) => {
             const res = await fetchThumbnail(cam.name);
             cam.thumbnailUrl = URL.createObjectURL(res);
-            console.log(cam.thumbnailUrl);
         });
         
         await Promise.all(promises);
