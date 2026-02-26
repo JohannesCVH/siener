@@ -4,3 +4,5 @@ src/client/src/**/*.js
 *.pem
 *.db
 *.pfx
+*.db-shm
+*.db-wal
