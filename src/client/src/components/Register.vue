@@ -29,11 +29,12 @@
     import { onMounted, ref, inject, watch } from 'vue';
     import Cookies from 'js-cookie'
     import { User } from '../models/User';
+    import { ToastType } from '../models/ToastTypes';
 
     const config: any = inject('config');
     const route = useRoute();
     const router = useRouter();
-    const makeToast = inject<(title: string, message: string) => void>('makeToast');
+    const makeToast = inject<(title: string, message: string, type: ToastType) => void>('makeToast');
 
     const username = ref('');
     const registerBtnTxt = ref('Register');
@@ -51,17 +52,21 @@
         
         try {
             const response = await axios.post(
-                `${config.API_URL}/User/Save`,
+                `${config.API_URL}:${config.API_PORT}/api/User/Save`,
                 user
             );
             
-            if (response.status == 200) {
-                makeToast('Registration Successful', 'User registered successfully!');
+            if (response.status == 201) {
+                makeToast('Registration Successful', 'User registered successfully!', ToastType.Sucess);
                 Cookies.set('User.Id', user.id);
                 router.push({ name: 'Dashboard' });
             }
         } catch(error) {
+            debugger
             console.error(error);
+            if (error.status == 500) {
+                makeToast('Error', 'Grave server error occurred.', ToastType.Error);
+            }
         } finally {
             setTimeout(() => {
                 registerBtnTxt.value = 'Register'

@@ -6,12 +6,8 @@ namespace SpiEyes.DAL;
 
 public class DatabaseContext : DbContext
 {
-    public DbSet<User> Users { get;set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<PushSubscription> PushSubscriptions { get; set; }
 
-    public DatabaseContext(DbContextOptions<DatabaseContext> dbContextOptions) : base(dbContextOptions) {}
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite("Data Source=App.db");
-    }
+    public DatabaseContext(DbContextOptions<DatabaseContext> dbContextOptions) : base(dbContextOptions) { }
 }
