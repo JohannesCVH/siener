@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SpiEyes.DAL;
 using SpiEyes.Models;
+using WebPush;
 
 namespace SpiEyes.Controllers;
 
@@ -9,10 +11,12 @@ namespace SpiEyes.Controllers;
 [ApiController]
 public class PushNotificationController : ControllerBase
 {
+    private readonly Config _config;
     private DatabaseContext _databaseContext { get; set; }
 
-    public PushNotificationController(DatabaseContext databaseContext)
+    public PushNotificationController(IOptions<Config> configOptions, DatabaseContext databaseContext)
     {
+        _config = configOptions.Value;
         _databaseContext = databaseContext;
     }
 
@@ -30,13 +34,36 @@ public class PushNotificationController : ControllerBase
                 _databaseContext.PushSubscriptions.Update(existing);
             }
             else
-        {
-            pushSubscription.Id = Guid.NewGuid();
-            await _databaseContext.AddAsync(pushSubscription);
+            {
+                pushSubscription.Id = Guid.NewGuid();
+                await _databaseContext.AddAsync(pushSubscription);
             }
             
             await _databaseContext.SaveChangesAsync();
             return new CreatedResult();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR | [{nameof(PushNotificationController)} -> {nameof(SaveSubscription)}] {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpPost("SendNotification")]
+    public async Task<IActionResult> SendNotification()
+    {
+        var webPushClient = new WebPushClient();
+
+        try
+        {
+            var ps = _databaseContext.PushSubscriptions.Include(x => x.Keys).FirstOrDefault();
+            
+            var subscription = new WebPush.PushSubscription(ps.Endpoint, ps.Keys.P256dh, ps.Keys.Auth);
+            var vapidDetails = new VapidDetails($"mailto: {_config.Email}", _config.VapidKeys.Public, _config.VapidKeys.Private);
+
+            await webPushClient.SendNotificationAsync(subscription, "payload", vapidDetails);
+
+            return Ok();
         }
         catch (Exception ex)
         {

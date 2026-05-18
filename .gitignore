@@ -6,3 +6,4 @@ src/client/src/**/*.js
 *.pfx
 *.db-shm
 *.db-wal
+./assets

@@ -13,7 +13,7 @@ public class CameraService : IHostedService
 
     private static bool LOG_FRAMES = false;
     
-    public CameraService(IOptions<Config> configOptions, ISharedDataService sharedDataService)
+    public CameraService(IOptions<Config> configOptions, ISharedDataService sharedDataService, IHostApplicationLifetime appLifetime)
     {
         _config = configOptions.Value;
         _sharedDataService = sharedDataService;
@@ -53,8 +53,9 @@ public class CameraService : IHostedService
                 record = true,
                 recordFormat = "fmp4",
                 recordPath = $"{streamsPath}/%path/Recordings/%Y-%m-%d_%H-%M-%S-%f",
-                recordSegmentDuration = "1m",
+                recordSegmentDuration = "4s",
                 recordPartDuration = "1s",
+                recordDeleteAfter = "32s"
             };
 
             var camera = new Camera();
@@ -70,10 +71,10 @@ public class CameraService : IHostedService
 
         _sharedDataService.Cameras = Cameras;
 
-        foreach (Camera cam in Cameras)
-        {
-            _ = Task.Run(() => ReadErrorFrame(cam));
-        }
+        // foreach (Camera cam in Cameras)
+        // {
+        //     _ = Task.Run(() => ReadErrorFrame(cam));
+        // }
     }
 
     private void ReadErrorFrame(Camera cam)
@@ -88,18 +89,8 @@ public class CameraService : IHostedService
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (Cameras != null)
-        {
-            foreach(Camera cam in Cameras)
-            {
-                cam.StreamProc.Kill();
-                cam.StreamProc.WaitForExit(3000);
-                cam.StreamProc.Dispose();
-            }
-        }
-
-        return Task.CompletedTask;
+        Console.WriteLine("Stopping FFmpeg processes");
     }
 }

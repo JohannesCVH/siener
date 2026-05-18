@@ -25,6 +25,7 @@ internal class Program
         builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlite(connectionString));
 
         builder.Services.AddSingleton<ISharedDataService, SharedDataService>();
+        builder.Services.AddHostedService<MediaMtxService>();
         builder.Services.AddHostedService<CameraService>();
 
         var app = builder.Build();

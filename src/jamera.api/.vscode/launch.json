@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (Console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // Path to your project's DLL
+            "program": "${workspaceFolder}/SpiEyes/bin/Debug/net10.0/SpiEyes.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/SpiEyes",
+            "stopAtEntry": false,
+            // CRITICAL: Set this to integratedTerminal to allow SIGINT handling
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+    ]
+}
