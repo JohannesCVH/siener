@@ -1,3 +1,8 @@
 {
-    "API_URL": "https://192.168.68.110:5001/api"
+    "API_URL": "https://silver-dragon",
+    "API_PORT": 5001,
+    "WEBRTC_HTTP_PORT": 8889,
+    "VAPID_PUBLIC_KEY": "BMiVs0pN6X68GvWM_50N5_BrvGXbPzbwUDgRpr0MgU-E_KUNxNHgOmCSSGFGjzhQKA0aQkZ9nS4U4fINBNLPrf4",
+    "CERT_LOCATION": "/home/johannescvh/Certs/cert.pem",
+    "KEY_LOCATION": "/home/johannescvh/Certs/key.pem"
 }
