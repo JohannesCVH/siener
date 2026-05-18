@@ -1,6 +1,6 @@
-using SpiEyes.Models;
+using Jamera.Models;
 
-namespace SpiEyes.Utility;
+namespace Jamera.Utility;
 
 public class DirectoryUtils
 {

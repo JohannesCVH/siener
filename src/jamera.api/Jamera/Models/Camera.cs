@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace SpiEyes.Models;
+namespace Jamera.Models;
 
 public class Camera
 {

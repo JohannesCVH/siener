@@ -3,11 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SpiEyes.DAL;
+using Jamera.DAL;
 
 #nullable disable
 
-namespace SpiEyes.Migrations
+namespace Jamera.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace SpiEyes.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
-            modelBuilder.Entity("SpiEyes.Models.PushSubscription", b =>
+            modelBuilder.Entity("Jamera.Models.PushSubscription", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,7 +35,7 @@ namespace SpiEyes.Migrations
                     b.ToTable("PushSubscriptions");
                 });
 
-            modelBuilder.Entity("SpiEyes.Models.PushSubscriptionKeys", b =>
+            modelBuilder.Entity("Jamera.Models.PushSubscriptionKeys", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,7 +60,7 @@ namespace SpiEyes.Migrations
                     b.ToTable("PushSubscriptionKeys");
                 });
 
-            modelBuilder.Entity("SpiEyes.Models.User", b =>
+            modelBuilder.Entity("Jamera.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,16 +75,16 @@ namespace SpiEyes.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("SpiEyes.Models.PushSubscriptionKeys", b =>
+            modelBuilder.Entity("Jamera.Models.PushSubscriptionKeys", b =>
                 {
-                    b.HasOne("SpiEyes.Models.PushSubscription", null)
+                    b.HasOne("Jamera.Models.PushSubscription", null)
                         .WithOne("Keys")
-                        .HasForeignKey("SpiEyes.Models.PushSubscriptionKeys", "PushSubscriptionId")
+                        .HasForeignKey("Jamera.Models.PushSubscriptionKeys", "PushSubscriptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SpiEyes.Models.PushSubscription", b =>
+            modelBuilder.Entity("Jamera.Models.PushSubscription", b =>
                 {
                     b.Navigation("Keys")
                         .IsRequired();

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace SpiEyes.Services;
+namespace Jamera.Services;
 
 public class MediaMtxService : IHostedService
 {

@@ -1,6 +1,6 @@
 using SixLabors.ImageSharp;
 
-namespace SpiEyes.General;
+namespace Jamera.General;
 
 public class FrameReceivedEventArgs : EventArgs
 {

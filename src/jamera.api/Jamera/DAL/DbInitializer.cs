@@ -1,6 +1,6 @@
-using SpiEyes.Models;
+using Jamera.Models;
 
-namespace SpiEyes.DAL;
+namespace Jamera.DAL;
 
 public static class DbInitializer
 {

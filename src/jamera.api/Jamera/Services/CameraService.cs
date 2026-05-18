@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
-using SpiEyes.Models;
-using SpiEyes.Utility;
+using Jamera.Models;
+using Jamera.Utility;
 
-namespace SpiEyes.Services;
+namespace Jamera.Services;
 
 public class CameraService : IHostedService
 {

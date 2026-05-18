@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using SpiEyes.DAL;
-using SpiEyes.Models;
-using SpiEyes.Services;
+using Jamera.DAL;
+using Jamera.Models;
+using Jamera.Services;
 
 internal class Program
 {
@@ -18,7 +18,7 @@ internal class Program
             });
         });
 
-        builder.Configuration.AddJsonFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SpiEyes/config.json"), optional: false, reloadOnChange: true);
+        builder.Configuration.AddJsonFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Jamera/config.json"), optional: false, reloadOnChange: true);
         builder.Services.Configure<Config>(builder.Configuration.GetSection("Configuration"));
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

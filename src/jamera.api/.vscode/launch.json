@@ -7,9 +7,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // Path to your project's DLL
-            "program": "${workspaceFolder}/SpiEyes/bin/Debug/net10.0/SpiEyes.dll",
+            "program": "${workspaceFolder}/Jamera/bin/Debug/net10.0/Jamera.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/SpiEyes",
+            "cwd": "${workspaceFolder}/Jamera",
             "stopAtEntry": false,
             // CRITICAL: Set this to integratedTerminal to allow SIGINT handling
             "console": "integratedTerminal",

@@ -1,6 +1,6 @@
 using System;
 
-namespace SpiEyes.Models;
+namespace Jamera.Models;
 
 public class CameraConfig
 {

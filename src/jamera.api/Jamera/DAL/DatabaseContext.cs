@@ -1,8 +1,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using SpiEyes.Models;
+using Jamera.Models;
 
-namespace SpiEyes.DAL;
+namespace Jamera.DAL;
 
 public class DatabaseContext : DbContext
 {

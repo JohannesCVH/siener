@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SpiEyes.Models;
+namespace Jamera.Models;
 
 public class User
 {

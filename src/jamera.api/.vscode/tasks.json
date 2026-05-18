@@ -3,8 +3,8 @@
 	"tasks": [
 		{
 			"type": "dotnet",
-			"task": "build /home/johannescvh/Projects/spi-eyes/src/api/SpiEyes/SpiEyes.csproj",
-			"file": "/home/johannescvh/Projects/spi-eyes/src/api/SpiEyes/SpiEyes.csproj",
+			"task": "build /home/johannescvh/Projects/jamera/src/api/Jamera/Jamera.csproj",
+			"file": "/home/johannescvh/Projects/jamera/src/api/Jamera/Jamera.csproj",
 			"group": "build",
 			"problemMatcher": [],
 			"label": "build"

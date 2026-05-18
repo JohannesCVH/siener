@@ -1,6 +1,6 @@
-using SpiEyes.Models;
+using Jamera.Models;
 
-namespace SpiEyes.Services;
+namespace Jamera.Services;
 
 public interface ISharedDataService
 {

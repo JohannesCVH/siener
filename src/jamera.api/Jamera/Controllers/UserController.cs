@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SpiEyes.DAL;
-using SpiEyes.Models;
+using Jamera.DAL;
+using Jamera.Models;
 
-namespace SpiEyes.Controllers;
+namespace Jamera.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

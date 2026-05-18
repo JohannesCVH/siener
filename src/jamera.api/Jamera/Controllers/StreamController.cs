@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using SpiEyes.Services;
-using SpiEyes.Utility;
+using Jamera.Services;
+using Jamera.Utility;
 
-namespace SpiEyes.Controllers;
+namespace Jamera.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

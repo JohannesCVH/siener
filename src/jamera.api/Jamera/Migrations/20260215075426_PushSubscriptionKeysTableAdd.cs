@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SpiEyes.Migrations
+namespace Jamera.Migrations
 {
     /// <inheritdoc />
     public partial class PushSubscriptionKeysTableAdd : Migration

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SpiEyes.Models;
+namespace Jamera.Models;
 
 public class PushSubscriptionKeys
 {

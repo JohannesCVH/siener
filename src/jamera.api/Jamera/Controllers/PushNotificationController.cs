@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using SpiEyes.DAL;
-using SpiEyes.Models;
+using Jamera.DAL;
+using Jamera.Models;
 using WebPush;
 
-namespace SpiEyes.Controllers;
+namespace Jamera.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
