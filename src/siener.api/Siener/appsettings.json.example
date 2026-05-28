@@ -1,0 +1,23 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "Kestrel": {
+    "Endpoints": {
+      "HttpsInlineCertFile": {
+        "Url": "https://0.0.0.0:5001",
+        "Certificate": {
+          "Path": "PATH_TO_PFX",
+          "Password": "YOUR_CERT_PASSWORD"
+        }
+      }
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=siener;Username=YOUR_USERNAME;Password=YOUR_PASSWORD"
+  }
+}

@@ -7,3 +7,7 @@ src/client/src/**/*.js
 *.db-shm
 *.db-wal
 ./assets
+node_modules
+.vscode
+appsettings.json
+appsettings.*.json
