@@ -60,9 +60,16 @@ public class CameraService : IHostedService
 
             var camera = new Camera();
 
-            var response = await client.PostAsJsonAsync(apiUrl, config);
-            if (response.IsSuccessStatusCode)
-                Console.WriteLine($"ERROR | [{nameof(CameraService)}: {_config.Cameras[i].Name}] | Couldn't push camera to MediaMTX.");
+            HttpResponseMessage response;
+            try
+            {
+                response = await client.PostAsJsonAsync(apiUrl, config);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR | [{nameof(CameraService)}: {_config.Cameras[i].Name}] | Couldn't push camera to MediaMTX. Exception: {ex.Message}");
+                continue;
+            }
 
             camera.Name = _config.Cameras[i].Name;
             camera.FrameProc = frameProc;
