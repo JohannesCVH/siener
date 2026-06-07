@@ -1,5 +1,4 @@
-bin
-obj
+.vscode
 src/client/src/**/*.js
 *.pem
 *.db
@@ -8,6 +7,3 @@ src/client/src/**/*.js
 *.db-wal
 ./assets
 node_modules
-.vscode
-appsettings.json
-appsettings.*.json

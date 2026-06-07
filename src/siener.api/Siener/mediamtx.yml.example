@@ -1,0 +1,10 @@
+api: yes
+apiAllowOrigin: "*"
+
+webrtc: yes
+webrtcAddress: :WEB_RTC_PORT
+webrtcEncryption: yes
+webrtcServerCert: PATH_TO_CERT.PEM
+webrtcServerKey: PATH_TO_KEY.PEM
+webrtcAllowOrigin: "*"
+rtspAddress: :RTSP_PORT
