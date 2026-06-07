@@ -55,7 +55,7 @@ public class CameraService : IHostedService
                 recordPath = $"{streamsPath}/%path/Recordings/%Y-%m-%d_%H-%M-%S-%f",
                 recordSegmentDuration = "4s",
                 recordPartDuration = "1s",
-                recordDeleteAfter = "32s"
+                recordDeleteAfter = "30s"
             };
 
             var camera = new Camera();

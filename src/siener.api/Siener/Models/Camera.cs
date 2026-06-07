@@ -8,4 +8,5 @@ public class Camera
     public Process StreamProc { get; set; }
     public Process FrameProc { get; set; }
     public Stream OutputStream { get; set; }
+    public string FramePath { get; set; }
 }

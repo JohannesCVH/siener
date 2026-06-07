@@ -24,10 +24,10 @@ public class MediaMtxService : IHostedService
         var mediaMtxProc = new Process { StartInfo = frameStartInfo };
         mediaMtxProc.Start();
 
-        _ = Task.Run(() => ReadErrorFrame(mediaMtxProc));
+        _ = Task.Run(() => ReadOutput(mediaMtxProc));
     }
 
-    private void ReadErrorFrame(Process proc)
+    private void ReadOutput(Process proc)
     {
         string line;
         while ((line = proc.StandardOutput.ReadLine()) != null)

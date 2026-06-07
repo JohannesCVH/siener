@@ -1,23 +1,26 @@
 using Siener.Models;
+using Siener.Services;
 
 namespace Siener.Utility;
 
 public class DirectoryUtils
 {
-    public static void GenerateStreamFolders(CameraConfig[] cameras)
+    public static void GenerateStreamFolders(CameraConfig[] cameraConfigs)
     {
         string basePath = PathUtils.CreateAppPath("Streams");
         Directory.Delete(basePath, true); //Clean up old files.
         Directory.CreateDirectory(basePath);
 
-        foreach (CameraConfig cam in cameras)
+        foreach (CameraConfig cam in cameraConfigs)
         {
             string camPath = Path.Combine(basePath, cam.Name);
             Directory.CreateDirectory(camPath);
-            string framesPath = Path.Combine(camPath, "Frames");
-            Directory.CreateDirectory(framesPath);
-            string segmentsPath = Path.Combine(camPath, "Recordings");
-            Directory.CreateDirectory(segmentsPath);
+            
+            string framePath = Path.Combine(camPath, "Frames");
+            Directory.CreateDirectory(framePath);
+
+            string segmentPath = Path.Combine(camPath, "Recordings");
+            Directory.CreateDirectory(segmentPath);
         }
     }
 }
