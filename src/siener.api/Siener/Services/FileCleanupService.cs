@@ -37,10 +37,7 @@ public class FileCleanupService : BackgroundService
                 {
                     var fileInfo = new FileInfo(file);
                     if (fileInfo.LastWriteTime < cutoffTime)
-                    {
                         File.Delete(file);
-                        Console.WriteLine($"[FileCleanup] | Deleted frame: {file}");
-                    }
                 }
             }
         }
