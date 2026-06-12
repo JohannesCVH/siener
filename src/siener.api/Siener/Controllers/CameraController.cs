@@ -7,11 +7,11 @@ namespace Siener.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DashboardController : ControllerBase
+    public class CameraController : ControllerBase
     {
         public ISharedDataService _sharedDataService { get; set; }
 
-        public DashboardController(ISharedDataService sharedDataService)
+        public CameraController(ISharedDataService sharedDataService)
         {
             _sharedDataService = sharedDataService;
         }

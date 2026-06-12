@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:siener.mobile/siener_http_client.dart';
+import 'package:siener.mobile/http_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -64,11 +64,11 @@ class _WebRTCStreamPlayerState extends State<WebRTCStreamPlayer> {
 
   Future<void> _initRenderer() async {
     await _renderer.initialize();
-    _connect();
+    await _connect();
   }
 
   Future<void> _connect() async {
-    final httpClient = await getSienerHttpClient();
+    final httpClient = await getHttpClientWithCert();
     _peerConnection = await createPeerConnection({});
 
     // Hook up the video stream
@@ -89,19 +89,24 @@ class _WebRTCStreamPlayerState extends State<WebRTCStreamPlayer> {
     final offer = await _peerConnection!.createOffer();
     await _peerConnection!.setLocalDescription(offer);
 
-    // Send to MediaMTX WHEP endpoint
-    final response = await httpClient.post(
-      Uri.parse(widget.whepUrl),
-      headers: {'Content-Type': 'application/sdp'},
-      body: offer.sdp,
-    );
-
-    // Handle Answer
-    if (response.statusCode == 201) {
-      final String answerSdp = response.body;
-      await _peerConnection!.setRemoteDescription(
-        RTCSessionDescription(answerSdp, 'answer'),
+    try {
+      // Send to MediaMTX WHEP endpoint
+      final response = await httpClient.post(
+        Uri.parse(widget.whepUrl),
+        headers: {'Content-Type': 'application/sdp'},
+        body: offer.sdp,
       );
+
+      // Handle Answer
+      if (response.statusCode == 201) {
+        final String answerSdp = response.body;
+        await _peerConnection!.setRemoteDescription(
+          RTCSessionDescription(answerSdp, 'answer'),
+        );
+      }
+    }
+    catch (exception) {
+      print('MediaMTX WHEP POST Error: ${exception}');
     }
   }
 
@@ -118,7 +123,7 @@ class _WebRTCStreamPlayerState extends State<WebRTCStreamPlayer> {
           aspectRatio: 16/9,
           child: RTCVideoView(
             _renderer,
-            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
           ),
         )
       ),
