@@ -4,16 +4,16 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:siener.client/http_client.dart';
 import 'package:siener.client/widgets/fullscreen_stream_player_widget.dart';
 
-class StreamPlayer extends StatefulWidget {
+class StreamPlayerWidget extends StatefulWidget {
   final String apiBaseUrl = dotenv.get('API_BASE_URL');
 
-  StreamPlayer({super.key});
+  StreamPlayerWidget({super.key});
 
   @override
-  State<StreamPlayer> createState() => _WebRTCStreamPlayerState();
+  State<StreamPlayerWidget> createState() => _WebRTCStreamPlayerState();
 }
 
-class _WebRTCStreamPlayerState extends State<StreamPlayer> {
+class _WebRTCStreamPlayerState extends State<StreamPlayerWidget> {
   final RTCVideoRenderer _renderer = RTCVideoRenderer();
   RTCPeerConnection? _peerConnection;
 
@@ -123,7 +123,7 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
   void _enterFullScreen(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FullScreenStreamPlayer(renderer: _renderer)
+        builder: (context) => FullScreenStreamPlayerWidget(renderer: _renderer)
       )
     );
   }

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-class FullScreenStreamPlayer extends StatefulWidget {
+class FullScreenStreamPlayerWidget extends StatefulWidget {
   final RTCVideoRenderer renderer;
 
-  const FullScreenStreamPlayer({super.key, required this.renderer});
+  const FullScreenStreamPlayerWidget({super.key, required this.renderer});
 
   @override
-  State<FullScreenStreamPlayer> createState() => _FullScreenStreamPlayerState();
+  State<FullScreenStreamPlayerWidget> createState() => _FullScreenStreamPlayerWidgetState();
 }
 
-class _FullScreenStreamPlayerState extends State<FullScreenStreamPlayer> {
+class _FullScreenStreamPlayerWidgetState extends State<FullScreenStreamPlayerWidget> {
   @override
   void initState() {
     super.initState();

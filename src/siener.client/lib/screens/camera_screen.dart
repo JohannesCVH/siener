@@ -12,7 +12,7 @@ class CameraScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Center(child: StreamPlayer())
+          Center(child: StreamPlayerWidget())
         ],
       ),
     );
