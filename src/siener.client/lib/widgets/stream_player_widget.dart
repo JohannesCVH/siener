@@ -127,4 +127,11 @@ class _WebRTCStreamPlayerState extends State<StreamPlayerWidget> {
       )
     );
   }
+
+  @override
+  void dispose() {
+    _peerConnection?.close();
+    _renderer.dispose();
+    super.dispose();
+  }
 }
