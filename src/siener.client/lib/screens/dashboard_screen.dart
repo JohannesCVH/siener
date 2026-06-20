@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:siener.mobile/logger.dart';
-import 'package:siener.mobile/models/camera.dart';
-import 'package:siener.mobile/screens/camera_screen.dart';
-import 'package:siener.mobile/services/camera_service.dart';
+import 'package:siener.client/logger.dart';
+import 'package:siener.client/models/camera.dart';
+import 'package:siener.client/screens/camera_screen.dart';
+import 'package:siener.client/services/camera_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

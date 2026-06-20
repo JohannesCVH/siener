@@ -1,4 +1,4 @@
-package com.example.siener_mobile
+package com.example.siener_client
 
 import io.flutter.embedding.android.FlutterActivity
 

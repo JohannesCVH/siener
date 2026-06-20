@@ -11,4 +11,4 @@
 - All the projects combined form a type of NVR (Network Video Recorder).
 - There are 2 projects:
     - siener.api: C#/.NET WebApi -> NVR backend
-    - siener.mobile: Flutter/Dart mobile app -> NVR interface
+    - siener.client: Flutter/Dart mobile app -> NVR interface

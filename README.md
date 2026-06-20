@@ -5,7 +5,7 @@ NVR program written in C# (WebAPI) and Dart/Flutter (Mobile client).
 
 ## What it does
 
-The project currently consists of 2 parts, siener.api and siener.mobile.
+The project currently consists of 2 parts, siener.api and siener.client.
 
 ## siener.api
 
@@ -13,7 +13,7 @@ This is the backbone of the project:
 * Spawns a FFMPEG process for each camera to read and save a frame every second.
 * Spawns a MediaMTX process, each camera's RTSP stream then gets pushed to MediaMTX which creates WebRTC streams.
 
-## siener.mobile
+## siener.client
 
 This is the mobile client where you can view different camera streams, (future) get notifications about detected objects like people/pets/cars and (future) manage settings.
 

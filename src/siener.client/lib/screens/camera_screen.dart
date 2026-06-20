@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:siener.mobile/http_client.dart';
+import 'package:siener.client/http_client.dart';
 
 class CameraScreen extends StatelessWidget {
   const CameraScreen({super.key});

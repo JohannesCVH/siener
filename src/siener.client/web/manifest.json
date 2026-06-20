@@ -1,6 +1,6 @@
 {
-    "name": "siener_mobile",
-    "short_name": "siener_mobile",
+    "name": "siener_client",
+    "short_name": "siener_client",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

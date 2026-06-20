@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:siener.mobile/logger.dart';
-import 'package:siener.mobile/models/camera.dart';
-import 'package:siener.mobile/http_client.dart';
+import 'package:siener.client/logger.dart';
+import 'package:siener.client/models/camera.dart';
+import 'package:siener.client/http_client.dart';
 
 class CameraService {
   final String _baseUrl;
