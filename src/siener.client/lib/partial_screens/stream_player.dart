@@ -17,6 +17,8 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
   final RTCVideoRenderer _renderer = RTCVideoRenderer();
   RTCPeerConnection? _peerConnection;
 
+  bool _isStreamReady = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +28,14 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
   Future<void> _initRenderer() async {
     await _renderer.initialize();
     await _connect();
+
+    _renderer.onResize = () {
+      if (!_isStreamReady) {
+        setState(() {
+          _isStreamReady = true;
+        });
+      }
+    };
   }
 
   Future<void> _connect() async {
@@ -37,7 +47,6 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
       // print('onTrack event received! Track kind: ${event.track.kind}');
       if (event.track.kind == 'video') {
         _renderer.srcObject = event.streams[0];
-        setState(() {});
       }
     };
 
@@ -83,7 +92,7 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
           aspectRatio: 16/9,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Stack(
+            child: _isStreamReady ? Stack(
               children: [
                 RTCVideoView(
                   _renderer,
@@ -105,7 +114,7 @@ class _WebRTCStreamPlayerState extends State<StreamPlayer> {
                   )
                 )
               ]
-            ),
+            ) : const Center(child: CircularProgressIndicator()),
           ),
         )
       );
