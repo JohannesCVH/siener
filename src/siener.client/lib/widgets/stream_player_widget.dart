@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:siener.client/http_client.dart';
-import 'package:siener.client/partial_screens/fullscreen_stream_player.dart';
+import 'package:siener.client/widgets/fullscreen_stream_player_widget.dart';
 
 class StreamPlayer extends StatefulWidget {
   final String apiBaseUrl = dotenv.get('API_BASE_URL');

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:siener.client/partial_screens/stream_player.dart';
+import 'package:siener.client/widgets/stream_player_widget.dart';
 
 class CameraScreen extends StatelessWidget {
   const CameraScreen({super.key});
