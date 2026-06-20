@@ -1,19 +1,23 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
+using Siener.Models;
 
 namespace Siener.Services;
 
 public class MediaMtxService : IHostedService
 {
-    public MediaMtxService()
+    private readonly Config _config;
+
+    public MediaMtxService(IOptions<Config> configOptions)
     {
-        
+        _config = configOptions.Value;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var frameStartInfo = new ProcessStartInfo
         {
-            FileName = "mediamtx",
+            FileName = _config.MediaMtxLocation,
             Arguments = "",
             UseShellExecute = false,
             RedirectStandardOutput = true,
