@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:siener.client/logger.dart';
@@ -31,6 +32,21 @@ class CameraService {
   }
 
   String getThumbnailUrl(String cameraName) {
-    return '$_baseUrl:$_basePort/api/Camera/GetThumbnail/$cameraName';
+    String url = '$_baseUrl:$_basePort/api/Camera/GetThumbnail/$cameraName';
+    logMessage(CameraService, 'getThumbnailUrl', 'Generated thumbnail URL: $url');
+    return url;
+  }
+
+  Future<Uint8List?> getThumbnailBytes(String cameraName) async {
+    final client = await getHttpClientWithCert();
+    try {
+      final response = await client.get(Uri.parse(getThumbnailUrl(cameraName.split('_').first)));
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      }
+    } catch (e) {
+      logError(CameraService, 'getThumbnailBytes', 'Failed: $e');
+    }
+    return null;
   }
 }

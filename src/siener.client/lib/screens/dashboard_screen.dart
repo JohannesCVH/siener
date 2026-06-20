@@ -3,6 +3,7 @@ import 'package:siener.client/logger.dart';
 import 'package:siener.client/models/camera.dart';
 import 'package:siener.client/screens/camera_screen.dart';
 import 'package:siener.client/services/camera_service.dart';
+import 'package:siener.client/widgets/camera_card_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,9 +30,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _isLoading = true;
     final List<Camera>? cameras = await _cameraService.fetchCameras();
     
-    if (cameras != null) {
+    if (cameras != null && cameras.isNotEmpty) {
       setState(() {
         _cameras = cameras;
+
+        //Temp testing
+        final template = cameras.first;
+        _cameras?.addAll(List.generate(11, (index) => Camera(name: '${template.name}_$index')));
+        
         _cameras?.forEach((camera) => logMessage(_DashboardScreenState, functionName, 'Camera loaded: ${camera.name}'));
         _isLoading = false;
       });
@@ -45,16 +51,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CameraScreen()),
-            );
-          }, child: const Text('Camera'),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),        
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (_cameras == null || _cameras!.isEmpty)
+              ? const Center(child: Text('No cameras available'))
+              : GridView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.0,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  itemCount: _cameras!.length,
+                  itemBuilder: (context, index) {
+                    final camera = _cameras![index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CameraScreen(),
+                          ),
+                        );
+                      },
+                      child: CameraCardWidget(
+                        camera: camera,
+                        cameraService: _cameraService,
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
