@@ -33,7 +33,7 @@ public class ObjectDetectionService : IObjectDetectionService
         }
         catch(Exception ex)
         {
-            
+            Console.WriteLine($"[ObjectDetectionService -> DetectAsync] | ERROR: {ex.Message}");
         }
         
         return [];

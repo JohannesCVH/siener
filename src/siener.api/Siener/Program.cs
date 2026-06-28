@@ -27,7 +27,8 @@ internal class Program
         builder.Services.AddSingleton<ISharedDataService, SharedDataService>();
         builder.Services.AddHostedService<MediaMtxService>();
         builder.Services.AddHostedService<CameraService>();
-        builder.Services.AddHostedService<FileCleanupService>();
+        // builder.Services.AddHostedService<FileCleanupService>();
+        builder.Services.AddHostedService<EventBackgroundService>();
 
         var app = builder.Build();
         app.MapControllers();
