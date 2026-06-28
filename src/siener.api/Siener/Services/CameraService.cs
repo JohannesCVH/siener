@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
+using Siener.Lib.Models;
 using Siener.Models;
 using Siener.Utility;
 

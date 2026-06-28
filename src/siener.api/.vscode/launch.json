@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Siener API",
+            "type": "dotnet",
+            "request": "launch",
+            "preLaunchTask": "build-siener",
+            "projectPath": "${workspaceFolder}/Siener/Siener.csproj",
+            "args": [],
+            "cwd": "${workspaceFolder}/Siener",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Launch Siener ML API",
+            "type": "dotnet",
+            "request": "launch",
+            "preLaunchTask": "build-siener-ml",
+            "projectPath": "${workspaceFolder}/Siener.ML/Siener.ML.csproj",
+            "args": [],
+            "cwd": "${workspaceFolder}/Siener.ML",
+            "stopAtEntry": false
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch Both APIs",
+            "configurations": [
+                "Launch Siener API",
+                "Launch Siener ML API"
+            ]
+        }
+    ]
+}

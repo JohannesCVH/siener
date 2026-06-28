@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
-using Siener.Models;
+using Siener.Lib.Models;
 
 namespace Siener.Services;
 

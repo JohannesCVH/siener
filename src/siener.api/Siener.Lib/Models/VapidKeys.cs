@@ -1,4 +1,4 @@
-namespace Siener.Models;
+namespace Siener.Lib.Models;
 
 public class VapidKeys
 {

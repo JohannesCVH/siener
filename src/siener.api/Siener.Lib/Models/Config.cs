@@ -1,4 +1,4 @@
-namespace Siener.Models;
+namespace Siener.Lib.Models;
 
 public class Config
 {
@@ -6,4 +6,5 @@ public class Config
     public VapidKeys VapidKeys { get; set; }
     public CameraConfig[] Cameras { get; set; }
     public string MediaMtxLocation { get; set; }
+    public string OnnxLocation { get; set; }
 }

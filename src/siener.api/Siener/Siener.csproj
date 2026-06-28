@@ -25,4 +25,8 @@
     <Folder Include="Utility\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Siener.Lib\Siener.Lib.csproj" />
+  </ItemGroup>
+
 </Project>

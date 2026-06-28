@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Siener.DAL;
-using Siener.Models;
+using Siener.Lib.Models;
 using Siener.Services;
 
 internal class Program
