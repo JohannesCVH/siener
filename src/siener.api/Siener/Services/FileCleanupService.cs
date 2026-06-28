@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Options;
-using Siener.Models;
+using Siener.Lib.Models;
 using Siener.Services;
-using Siener.Utility;
 
 public class FileCleanupService : BackgroundService
 {
@@ -25,14 +24,8 @@ public class FileCleanupService : BackgroundService
 
             foreach (var camera in _sharedDataService.Cameras)
             {
-                if (string.IsNullOrEmpty(camera.FramePath))
-                {
-                    var camPath = PathUtils.CreateStreamsPath(camera.Name);
-                    camera.FramePath = Path.Combine(camPath, "Frames");
-                }
-
                 var files = Directory.GetFiles(camera.FramePath);
-                var cutoffTime = DateTime.Now.AddSeconds(-30);
+                var cutoffTime = DateTime.Now.AddSeconds(-10);
                 foreach (var file in files)
                 {
                     var fileInfo = new FileInfo(file);

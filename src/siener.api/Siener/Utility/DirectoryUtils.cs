@@ -4,10 +4,11 @@ namespace Siener.Utility;
 
 public class DirectoryUtils
 {
-    public static void GenerateStreamFolders(CameraConfig[] cameraConfigs)
+    public static void GenerateCameraFolders(CameraConfig[] cameraConfigs)
     {
-        string basePath = PathUtils.CreateAppPath("Streams");
-        Directory.Delete(basePath, true); //Clean up old files.
+        string basePath = PathUtils.GetAppPath("Cameras");
+        if (Directory.Exists(basePath))
+            Directory.Delete(basePath, true); //Clean up old files.
         Directory.CreateDirectory(basePath);
 
         foreach (CameraConfig cam in cameraConfigs)

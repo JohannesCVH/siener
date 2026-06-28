@@ -19,7 +19,7 @@ namespace Siener.Controllers
         [HttpGet("GetThumbnail/{cameraName}")]
         public IActionResult GetThumbnail(string cameraName)
         {
-            var path = PathUtils.CreateAppPath($"Streams/{cameraName}/Frames");
+            var path = PathUtils.GetAppPath($"Streams/{cameraName}/Frames");
             IEnumerable<string> images = Directory.EnumerateFiles(path);
             var thumb = images.MaxBy(x => int.Parse(string.Concat(x.Where(char.IsDigit))));
             var filePath = Path.Combine(path, thumb);

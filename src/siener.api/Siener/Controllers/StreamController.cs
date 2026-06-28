@@ -21,7 +21,7 @@ public class StreamController : ControllerBase
     {
         try
         {
-            var path = PathUtils.CreateAppPath($"Streams/{cameraName}/output.m3u8");
+            var path = PathUtils.GetAppPath($"Streams/{cameraName}/output.m3u8");
             return PhysicalFile(path, "application/x-mpegURL");
         }
         catch(Exception ex)
@@ -34,7 +34,7 @@ public class StreamController : ControllerBase
     [HttpGet("{cameraName}/{segmentId}.ts")]
     public IActionResult GetStreamSegment(string cameraName, string segmentId)
     {
-        var filePath = PathUtils.CreateAppPath($"Streams/{cameraName}/Segments/{segmentId}.ts");
+        var filePath = PathUtils.GetAppPath($"Streams/{cameraName}/Segments/{segmentId}.ts");
         return PhysicalFile(filePath, "video/MP2T");
     }
 

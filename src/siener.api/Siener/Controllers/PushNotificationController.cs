@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Siener.DAL;
-using Siener.Models;
+using Siener.Lib.Models;
 using WebPush;
 
 namespace Siener.Controllers;

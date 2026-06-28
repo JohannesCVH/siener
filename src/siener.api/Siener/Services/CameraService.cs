@@ -18,7 +18,7 @@ public class CameraService : IHostedService
     {
         _config = configOptions.Value;
         _sharedDataService = sharedDataService;
-        DirectoryUtils.GenerateStreamFolders(_config.Cameras);
+        DirectoryUtils.GenerateCameraFolders(_config.Cameras);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -27,13 +27,13 @@ public class CameraService : IHostedService
         
         for (int i = 0; i < _config.Cameras.Length; i++)
         {
-            var streamsPath = PathUtils.CreateStreamsPath();
+            var camerasPath = PathUtils.GetCamerasPath();
         
             var frameStartInfo = new ProcessStartInfo
             {
                 FileName = "ffmpeg",
                 Arguments =
-                    $"-rtsp_transport tcp -fflags nobuffer -flags low_delay -i \"{_config.Cameras[i].URL}\" -vf fps=1 {streamsPath}/{_config.Cameras[i].Name}/Frames/frame_%04d.jpg",
+                    $"-rtsp_transport tcp -fflags nobuffer -flags low_delay -i \"{_config.Cameras[i].URL}\" -vf fps=1 {camerasPath}/{_config.Cameras[i].Name}/Frames/frame_%04d.jpg",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -53,13 +53,11 @@ public class CameraService : IHostedService
                 rtspTransport = "tcp",
                 record = true,
                 recordFormat = "fmp4",
-                recordPath = $"{streamsPath}/%path/Recordings/%Y-%m-%d_%H-%M-%S-%f",
+                recordPath = $"{camerasPath}/%path/Recordings/%Y-%m-%d_%H-%M-%S-%f",
                 recordSegmentDuration = "4s",
                 recordPartDuration = "1s",
                 recordDeleteAfter = "30s"
             };
-
-            var camera = new Camera();
 
             HttpResponseMessage response;
             try
@@ -72,8 +70,13 @@ public class CameraService : IHostedService
                 continue;
             }
 
-            camera.Name = _config.Cameras[i].Name;
-            camera.FrameProc = frameProc;
+            var camera = new Camera
+            {
+                Name = _config.Cameras[i].Name,
+                FrameProc = frameProc
+            };
+            var camPath = PathUtils.GetCameraPath(camera.Name);
+            camera.FramePath = Path.Combine(camPath, "Frames");
             Cameras.Add(camera);
         }
 
