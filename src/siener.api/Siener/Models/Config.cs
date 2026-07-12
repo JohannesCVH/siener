@@ -1,4 +1,4 @@
-namespace Siener.Lib.Models;
+namespace Siener.Models;
 
 public class Config
 {
