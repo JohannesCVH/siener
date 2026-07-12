@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Siener.DAL;
-using Siener.Lib.Models;
+using Siener.Data;
+using Siener.Models;
 using Siener.Services;
 
 internal class Program
@@ -34,12 +34,32 @@ internal class Program
         app.MapControllers();
         app.UseCors("AllowAll");
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-            db.Database.EnsureCreated();
-            DbInitializer.Initialize(db);
-        }
+        // using (var scope = app.Services.CreateScope())
+        // {
+        //     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+
+        //     try 
+        //     {
+        //         // 1. Verify connection
+        //         if (db.Database.CanConnect())
+        //         {
+        //             Console.WriteLine("Successfully connected to the database.");
+
+        //             // 2. Test access to the events table
+        //             var eventCount = db.Events.Count();
+        //             Console.WriteLine($"Successfully accessed 'events' table. Total count: {eventCount}");
+        //         }
+        //         else
+        //         {
+        //             Console.WriteLine("Failed to connect to the database.");
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // Log the error
+        //         Console.WriteLine($"An error occurred while testing the database: {ex.Message}");
+        //     }
+        // }
 
         app.Run();
     }
