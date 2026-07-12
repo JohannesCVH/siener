@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Siener.Data;
 using Siener.Models;
 using Siener.Services;
+using YoloDotNet;
+using YoloDotNet.ExecutionProvider.Cpu;
+using YoloDotNet.Models;
 
 internal class Program
 {
@@ -23,6 +26,15 @@ internal class Program
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
+
+        var modelPath = builder.Configuration.GetSection("Configuration")["OnnxLocation"];
+        var yolo = new Yolo(new YoloOptions
+        {
+            ExecutionProvider = new CpuExecutionProvider(modelPath)
+        });
+
+        builder.Services.AddSingleton(yolo);
+        builder.Services.AddSingleton<IObjectDetectionService, ObjectDetectionService>();
 
         builder.Services.AddSingleton<ISharedDataService, SharedDataService>();
         builder.Services.AddHostedService<MediaMtxService>();
