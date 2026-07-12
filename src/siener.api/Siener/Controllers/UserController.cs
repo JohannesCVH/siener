@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Siener.DAL;
+using Siener.Data;
 using Siener.Models;
 
 namespace Siener.Controllers;
@@ -37,11 +37,12 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = await _databaseContext.Users.Where(x => x.Username == loginRequest.Username).FirstOrDefaultAsync();
-            if (user is null)
-                return new UnauthorizedResult();
+            // var user = await _databaseContext.Users.Where(x => x.Username == loginRequest.Username).FirstOrDefaultAsync();
+            // if (user is null)
+            //     return new UnauthorizedResult();
             
-            return new OkObjectResult(user);
+            // return new OkObjectResult(user);
+            return new OkResult();
         }
         catch(Exception ex)
         {
