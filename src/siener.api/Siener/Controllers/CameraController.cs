@@ -17,12 +17,23 @@ namespace Siener.Controllers
         }
 
         [HttpGet("GetThumbnail/{cameraName}")]
-        public IActionResult GetThumbnail(string cameraName)
+        public async Task<IActionResult> GetThumbnailAsync(string cameraName)
         {
-            var path = PathUtils.GetAppPath($"Streams/{cameraName}/Frames");
-            IEnumerable<string> images = Directory.EnumerateFiles(path);
-            var thumb = images.MaxBy(x => int.Parse(string.Concat(x.Where(char.IsDigit))));
-            var filePath = Path.Combine(path, thumb);
+            var cameraPath = PathUtils.GetCameraPath(cameraName, "Frames");
+            IEnumerable<string> images = Enumerable.Empty<string>();
+            
+            images = Directory.EnumerateFiles(cameraPath);
+            if (!images.Any()) return new NoContentResult();
+            
+            var thumb = images.MaxBy(x =>
+            {
+                var fileName = Path.GetFileName(x);
+                var chars = fileName.Where(char.IsDigit);
+                int num = int.Parse(string.Concat(chars));
+                return num;
+            });
+            if (thumb is null) throw new Exception("Thumb cannot be empty.");
+            var filePath = Path.Combine(cameraPath, thumb);
             return PhysicalFile(filePath, "image/jpeg");
         }
 
