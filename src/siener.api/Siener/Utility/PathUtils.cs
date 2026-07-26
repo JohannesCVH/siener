@@ -8,6 +8,6 @@ public class PathUtils
     public static string GetCamerasPath() =>
         Path.Combine(GetAppPath(), "Cameras");
 
-    public static string GetCameraPath(string camera) =>
-        Path.Combine(GetCamerasPath(), camera);
+    public static string GetCameraPath(string camera, string? subFolder = default) =>
+        Path.Combine(GetCamerasPath(), camera, subFolder ?? string.Empty);
 }
