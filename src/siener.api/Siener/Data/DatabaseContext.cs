@@ -24,6 +24,7 @@ public class DatabaseContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.SessionId).HasColumnName("session_id").IsRequired();
             entity.Property(e => e.Camera).HasColumnName("camera").IsRequired();
             entity.Property(e => e.DetectionTypes).HasColumnName("detection_types").IsRequired();
             entity.Property(e => e.StartTime).HasColumnName("start_time").IsRequired();

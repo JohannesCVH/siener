@@ -1,18 +1,23 @@
 using System.Diagnostics;
 using System.Threading.Channels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Siener.Data;
 using Siener.Data.Entities;
 using Siener.Models;
 using Siener.Services;
+using Siener.Utility;
+using static Siener.Utility.LoggerExtensions;
 
 public class EventBackgroundService : IHostedService
 {
+    private readonly Config _config;
     private readonly ISharedDataService _sharedDataService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IObjectDetectionService _objectDetectionService;
     private record FrameProcessingRequest(string Camera, string FilePath);
     private readonly List<ChannelWriter<FrameProcessingRequest>> _channelWriters = new();
+    private readonly ILogger<EventBackgroundService> _logger;
 
     private static readonly Dictionary<string, DetectionTypes> LabelMap = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -21,16 +26,24 @@ public class EventBackgroundService : IHostedService
         { "car", DetectionTypes.Car }
     };
     
-    public EventBackgroundService(ISharedDataService sharedDataService, IServiceScopeFactory scopeFactory, IObjectDetectionService objectDetectionService)
+    public EventBackgroundService(
+        IOptions<Config> configOptions,
+        ISharedDataService sharedDataService, 
+        IServiceScopeFactory scopeFactory, 
+        IObjectDetectionService objectDetectionService,
+        ILogger<EventBackgroundService> logger
+    )
     {
+        _config = configOptions.Value;
         _sharedDataService = sharedDataService;
         _scopeFactory = scopeFactory;
         _objectDetectionService = objectDetectionService;
+        _logger = logger;
     }
     
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        foreach (var camera in _sharedDataService.Cameras)
+        foreach (var camera in _sharedDataService.Cameras!)
         {
             var channel = Channel.CreateUnbounded<FrameProcessingRequest>();
             _channelWriters.Add(channel.Writer);
@@ -64,7 +77,9 @@ public class EventBackgroundService : IHostedService
 
     private async Task ProcessFrameAsync(string camera, string filePath, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Camera: {camera}, File: {filePath}");
+        string methodName = nameof(ProcessEventAsync);
+        
+        // Console.WriteLine($"Camera: {camera}, File: {filePath}");
         try
         {
             byte[] buffer;
@@ -76,7 +91,7 @@ public class EventBackgroundService : IHostedService
 
             if (buffer.Length == 0)
             {
-                Console.WriteLine($"[EventBackgroundService -> ProcessFrameAsync] | ERROR: buffer cannot be empty.");
+                _logger.LogMessage(LogType.Error, methodName, "Buffer cannot be empty.");
                 return;
             }
 
@@ -85,15 +100,11 @@ public class EventBackgroundService : IHostedService
             var detections = await _objectDetectionService.DetectAsync(buffer);
             await ProcessEventAsync(camera, detections, cancellationToken);
 
-            Console.WriteLine($"Object detection api responded in: {sw.ElapsedMilliseconds}ms");
+            _logger.LogMessage(LogType.Information, methodName, $"Object detection api responded in: {sw.ElapsedMilliseconds}ms");
         }
         catch(Exception ex)
         {
-            Console.WriteLine($"[EventBackgroundService -> ProcessFrameAsync] | ERROR: {ex.Message}");
-        }
-        finally
-        {
-            File.Delete(filePath);
+            _logger.LogMessage(LogType.Error, methodName, ex.Message);
         }
     }
 
@@ -120,56 +131,76 @@ public class EventBackgroundService : IHostedService
 
     private async Task EndEventAsync(string camera, CancellationToken cancellationToken)
     {
-        using (IServiceScope scope = _scopeFactory.CreateAsyncScope())
+        string methodName = nameof(EndEventAsync);
+        
+        try
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            using (IServiceScope scope = _scopeFactory.CreateAsyncScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 
-            var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null, cancellationToken);
-            if (detectionEvent is null)
-                return;
+                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null, cancellationToken);
+                if (detectionEvent is null)
+                    return;
 
-            detectionEvent.EndTime = DateTime.UtcNow;
-            await dbContext.SaveChangesAsync(cancellationToken);
+                detectionEvent.EndTime = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            _logger.LogMessage(LogType.Information, methodName, $"Ended event for {camera}");
         }
-
-        Console.WriteLine($"[Event] | Ended event for {camera} at {DateTime.Now}");
+        catch(Exception ex)
+        {
+            _logger.LogMessage(LogType.Error, methodName, ex.Message);
+        }
     }
 
     private async Task StartOrUpdateEventAsync(string camera, short detectedFlags, CancellationToken cancellationToken)
-    {
-        using (IServiceScope scope = _scopeFactory.CreateAsyncScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-
-            bool shouldAdd = false;
-
-            var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null);
-            if (detectionEvent is null)
-            {
-                shouldAdd = true;
-                detectionEvent = new Event
-                {
-                    Camera = camera,
-                    StartTime = DateTime.UtcNow,
-                    Notified = false
-                };
-            }
-
-            detectionEvent.DetectionTypes |= detectedFlags;
-
-            if (shouldAdd)
-            {
-                await dbContext.AddAsync(detectionEvent);
-                Console.WriteLine($"[Event] | Added event for {camera} at {DateTime.Now}");
-            }
-            else
-            {
-                Console.WriteLine($"[Event] | Updated event for {camera} at {DateTime.Now}");
-            }
-
-            await dbContext.SaveChangesAsync();
-        }
-
+    {        
+        string methodName = nameof(StartOrUpdateEventAsync);
         
+        try
+        {
+            using (IServiceScope scope = _scopeFactory.CreateAsyncScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+
+                bool shouldAdd = false;
+                var currentTime = DateTime.UtcNow;
+
+                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null);
+                if (detectionEvent is not null && detectionEvent.SessionId != _config.SessionId)
+                {
+                    await EndEventAsync(camera, cancellationToken);
+                    detectionEvent = null;
+                }
+                
+                if (detectionEvent is null)
+                {
+                    shouldAdd = true;
+                    detectionEvent = new Event
+                    {
+                        SessionId = _config.SessionId,
+                        Camera = camera,
+                        StartTime = currentTime,
+                        Notified = false
+                    };
+                }
+
+                detectionEvent.DetectionTypes |= detectedFlags;
+
+                if (shouldAdd)
+                {
+                    _logger.LogMessage(LogType.Information, methodName, "Detection event started");
+                    await dbContext.AddAsync(detectionEvent);
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogMessage(LogType.Error, methodName, ex.Message);
+        }
     }
 }
