@@ -43,7 +43,8 @@ internal class Program
         builder.Services.AddSingleton<IObjectDetectionService, ObjectDetectionService>();
 
         builder.Services.AddSingleton<ISharedDataService, SharedDataService>();
-        builder.Services.AddHostedService<MediaMtxService>();
+        builder.Services.AddSingleton<MediaMtxService>();
+        builder.Services.AddSingleton<FFmpegService>();
         builder.Services.AddHostedService<CameraService>();
         builder.Services.AddHostedService<FileCleanupService>();
         builder.Services.AddHostedService<EventBackgroundService>();

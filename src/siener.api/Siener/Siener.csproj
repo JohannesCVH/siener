@@ -37,4 +37,10 @@
     <ProjectReference Include="..\Siener.Lib\Siener.Lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="mediamtx.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 </Project>
