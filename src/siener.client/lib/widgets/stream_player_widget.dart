@@ -1,83 +1,61 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:siener.client/http_client.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:siener.client/models/camera.dart';
+import 'package:siener.client/services/stream_player_service.dart';
 import 'package:siener.client/widgets/fullscreen_stream_player_widget.dart';
 
 class StreamPlayerWidget extends StatefulWidget {
-  final String apiBaseUrl = dotenv.get('API_BASE_URL');
+  final Camera camera;
 
-  StreamPlayerWidget({super.key});
+  StreamPlayerWidget({
+    super.key,
+    required this.camera
+  });
 
   @override
   State<StreamPlayerWidget> createState() => _WebRTCStreamPlayerState();
 }
 
 class _WebRTCStreamPlayerState extends State<StreamPlayerWidget> {
-  final RTCVideoRenderer _renderer = RTCVideoRenderer();
-  RTCPeerConnection? _peerConnection;
-
-  bool _isStreamReady = false;
+  late final StreamPlayerService _streamPlayerService;
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
 
   @override
   void initState() {
     super.initState();
-    _initRenderer();
+    
+    _streamPlayerService = StreamPlayerService(camera: widget.camera);
+    _initService();
+
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
+      //If Landscape
+      if (event.x.abs() > 7.0 && event.y.abs() < 4.0) {
+        if (ModalRoute.of(context)?.isCurrent == true && _streamPlayerService.isRotateable) {
+          _enterFullScreen(context);
+        }
+      }
+      
+      //If Portrait
+      if (event.y.abs() > 7.0 && event.x.abs() < 4.0) {
+        _streamPlayerService.isRotateable = true;
+      }
+    });
   }
 
-  Future<void> _initRenderer() async {
-    await _renderer.initialize();
-    await _connect();
+  Future<void> _initService() async {
+    await _streamPlayerService.initialize();
 
-    _renderer.onResize = () {
-      if (!_isStreamReady) {
+    _streamPlayerService.renderer.onResize = () {
+      if (!_streamPlayerService.isStreamReady) {
         setState(() {
-          _isStreamReady = true;
+          _streamPlayerService.isStreamReady = true;
         });
       }
     };
-  }
-
-  Future<void> _connect() async {
-    final httpClient = await getHttpClientWithCert();
-    _peerConnection = await createPeerConnection({});
-
-    // Hook up the video stream
-    _peerConnection!.onTrack = (event) {
-      // print('onTrack event received! Track kind: ${event.track.kind}');
-      if (event.track.kind == 'video') {
-        _renderer.srcObject = event.streams[0];
-      }
-    };
-
-    // Transceiver setup
-    await _peerConnection!.addTransceiver(
-        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-        init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly));
-
-    // Create Offer
-    final offer = await _peerConnection!.createOffer();
-    await _peerConnection!.setLocalDescription(offer);
-
-    try {
-      // Send to MediaMTX WHEP endpoint
-      final response = await httpClient.post(
-        Uri.parse('${widget.apiBaseUrl}:${dotenv.get('WEB_RTC_PORT')}/Vigi/whep'),
-        headers: {'Content-Type': 'application/sdp'},
-        body: offer.sdp,
-      );
-
-      // Handle Answer
-      if (response.statusCode == 201) {
-        final String answerSdp = response.body;
-        await _peerConnection!.setRemoteDescription(
-          RTCSessionDescription(answerSdp, 'answer'),
-        );
-      }
-    }
-    catch (exception) {
-      print('MediaMTX WHEP POST Error: ${exception}');
-    }
   }
 
   @override
@@ -86,52 +64,46 @@ class _WebRTCStreamPlayerState extends State<StreamPlayerWidget> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double videoWidth = screenWidth - (padding * 2);
 
-    return SizedBox(
-        width: videoWidth,
-        child: AspectRatio(
-          aspectRatio: 16/9,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: _isStreamReady ? Stack(
-              children: [
-                RTCVideoView(
-                  _renderer,
-                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                ),
-
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Container(
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.fullscreen,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      onPressed: () => _enterFullScreen(context),
-                    )
-                  )
-                )
-              ]
-            ) : const Center(child: CircularProgressIndicator()),
-          ),
-        )
-      );
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return SizedBox(
+          width: videoWidth,
+          child: AspectRatio(
+            aspectRatio: 16/9,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: _streamPlayerService.isStreamReady ? Stack(
+                children: [
+                  RTCVideoView(
+                    _streamPlayerService.renderer,
+                    objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                  ),
+                ]
+              ) : const Center(child: CircularProgressIndicator()),
+            ),
+          )
+        );
+      }
+    );
   }
 
-  void _enterFullScreen(BuildContext context) {
-    Navigator.of(context).push(
+  void _enterFullScreen(BuildContext context) async {
+    _streamPlayerService.isRotateable = false;
+    await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FullScreenStreamPlayerWidget(renderer: _renderer)
+        builder: (context) => FullScreenStreamPlayerWidget(streamPlayerService: _streamPlayerService,)
       )
     );
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
   }
 
   @override
   void dispose() {
-    _peerConnection?.close();
-    _renderer.dispose();
+    _accelerometerSubscription?.cancel();
+    _streamPlayerService.dispose();
     super.dispose();
   }
 }

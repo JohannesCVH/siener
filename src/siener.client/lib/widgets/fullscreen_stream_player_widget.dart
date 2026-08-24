@@ -1,38 +1,43 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:siener.client/services/stream_player_service.dart';
 
 class FullScreenStreamPlayerWidget extends StatefulWidget {
-  final RTCVideoRenderer renderer;
+  final StreamPlayerService _streamPlayerService;
 
-  const FullScreenStreamPlayerWidget({super.key, required this.renderer});
+  const FullScreenStreamPlayerWidget({super.key, required this._streamPlayerService});
 
   @override
   State<FullScreenStreamPlayerWidget> createState() => _FullScreenStreamPlayerWidgetState();
 }
 
 class _FullScreenStreamPlayerWidgetState extends State<FullScreenStreamPlayerWidget> {
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
+  
   @override
   void initState() {
     super.initState();
-    // Force Landscape orientation (equivalent to Orientation configuration in Xamarin/MAUI)
+    
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+
     // Hide Status bar and Bottom Navigation Bar (Immersive Full Screen)
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  }
 
-  @override
-  void dispose() {
-    // Restore orientation back to normal portrait when exiting full screen
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    // Restore standard device notification/navigation overlays
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    super.dispose();
+    //When portrait exit full screen
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
+      if (event.y.abs() > 7.0 && event.x.abs() < 4.0) {
+        if (ModalRoute.of(context)?.isCurrent == true) {
+          _exitFullScreen(context);
+        }
+      }
+    });
   }
 
   @override
@@ -41,36 +46,30 @@ class _FullScreenStreamPlayerWidgetState extends State<FullScreenStreamPlayerWid
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Center the 16:9 stream on screen
           Center(
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: RTCVideoView(
-                widget.renderer,
+                widget._streamPlayerService.renderer,
                 objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-              ),
-            ),
-          ),
-          
-          // Back/Exit button in top-left
-          Positioned(
-            top: 16,
-            right: 48,
-            child: SafeArea(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 28),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _exitFullScreen(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  @override
+  void dispose() {
+    _accelerometerSubscription?.cancel();
+
+    // Restore standard device notification/navigation overlays
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
   }
 }

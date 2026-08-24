@@ -33,11 +33,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (cameras != null && cameras.isNotEmpty) {
       setState(() {
         _cameras = cameras;
-
-        //Temp testing
-        final template = cameras.first;
-        _cameras?.addAll(List.generate(11, (index) => Camera(name: '${template.name}_$index')));
-        
         _cameras?.forEach((camera) => logMessage(_DashboardScreenState, functionName, 'Camera loaded: ${camera.name}'));
         _isLoading = false;
       });
@@ -55,16 +50,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : (_cameras == null || _cameras!.isEmpty)
-              ? const Center(child: Text('No cameras available'))
-              : GridView.builder(
+              ? RefreshIndicator(
+                onRefresh: () async {
+                  await _loadCameras();
+                }, 
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(
+                      height: 500, // Fills enough height to allow pulling down
+                      child: Center(child: Text('No cameras available')),
+                    ),
+                  ],
+                ),
+              )
+              : RefreshIndicator(
+                onRefresh: () async {
+                  await _loadCameras();
+                }, 
+                child: ListView.builder(
                   padding: const EdgeInsets.all(8.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.0,
-                    crossAxisSpacing: 8.0,
-                    mainAxisSpacing: 8.0,
-                  ),
                   itemCount: _cameras!.length,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final camera = _cameras![index];
                     return GestureDetector(
@@ -72,7 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CameraScreen(),
+                            builder: (context) => CameraScreen(camera: camera),
                           ),
                         );
                       },
@@ -82,7 +89,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     );
                   },
-                ),
+                )
+              ),
     );
   }
 }
