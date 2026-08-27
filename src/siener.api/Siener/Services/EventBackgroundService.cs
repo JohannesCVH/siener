@@ -82,14 +82,29 @@ public class EventBackgroundService : IHostedService
         // Console.WriteLine($"Camera: {camera}, File: {filePath}");
         try
         {
-            byte[] buffer;
-            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+            byte[]? buffer = null;
+            int retryCount = 0;
+            do
             {
-                buffer = new byte[fs.Length];
-                await fs.ReadAsync(buffer, 0, buffer.Length);
-            };
+                if (retryCount >= 3)
+                    break;
+                
+                if (retryCount > 0)
+                    _logger.LogMessage(LogType.Information, methodName, $"Image read retry: {retryCount}");
 
-            if (buffer.Length == 0)
+                await Task.Delay(100 << retryCount); //Delay initially so file has time to be written to disk fully.
+                
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    buffer = new byte[fs.Length];
+                    await fs.ReadExactlyAsync(buffer, 0, buffer.Length, cancellationToken);
+                };
+
+                retryCount++;
+            }
+            while (buffer.Length == 0);
+
+            if (buffer is null || buffer.Length == 0)
             {
                 _logger.LogMessage(LogType.Error, methodName, "Buffer cannot be empty.");
                 return;
@@ -100,7 +115,7 @@ public class EventBackgroundService : IHostedService
             var detections = await _objectDetectionService.DetectAsync(buffer);
             await ProcessEventAsync(camera, detections, cancellationToken);
 
-            _logger.LogMessage(LogType.Information, methodName, $"Object detection api responded in: {sw.ElapsedMilliseconds}ms");
+            _logger.LogMessage(LogType.Information, methodName, $"Object detection service responded in: {sw.ElapsedMilliseconds}ms for camera: {camera}");
         }
         catch(Exception ex)
         {
