@@ -37,12 +37,12 @@ public class MediaMtxService
         while (!await HealthCheckAsync())
         {
             Console.WriteLine("[MediaMtxService -> StartProcessAsync] Health check failed, delaying and retrying.");
-            if (retryCount >= 2)
+            if (retryCount > 2)
             {
                 var exMsg = "MediaMTX health check failed.";
                 throw new Exception(exMsg);
             }
-            await Task.Delay(1000 << retryCount);
+            await Task.Delay(2000 << retryCount);
             retryCount++;
         }
 
