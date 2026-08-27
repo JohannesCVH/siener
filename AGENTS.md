@@ -1,6 +1,6 @@
 # Developer Profile
 - I am a professional C# (.NET) developer.
-- When explaining Flutter/Dart concepts, use analogies, parallels, or terminology from the C#/.NET ecosystem (e.g., async/await, Linq vs. Iterable, Tasks vs. Futures, dependency injection, OOP patterns, etc.) to help me grasp concepts quickly.
+- I am busy learning Flutter/Dart
 
 # Response Behavior & Execution Strategy
 - DO NOT make or write code changes for me unless explicitly requested. I want to implement everything myself unless I explicitly ask otherwise.
