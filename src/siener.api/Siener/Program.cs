@@ -36,7 +36,8 @@ internal class Program
         var modelPath = builder.Configuration.GetSection("Configuration")["OnnxLocation"];
         var yolo = new Yolo(new YoloOptions
         {
-            ExecutionProvider = new CpuExecutionProvider(modelPath!)
+            ExecutionProvider = new CpuExecutionProvider(modelPath!),
+            ImageResize = YoloDotNet.Enums.ImageResize.Proportional,
         });
 
         builder.Services.AddSingleton(yolo);
@@ -67,33 +68,6 @@ internal class Program
         app.MapControllers();
         app.UseCors("AllowAll");
         app.UseSerilogRequestLogging();
-
-        // using (var scope = app.Services.CreateScope())
-        // {
-        //     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-
-        //     try 
-        //     {
-        //         // 1. Verify connection
-        //         if (db.Database.CanConnect())
-        //         {
-        //             Console.WriteLine("Successfully connected to the database.");
-
-        //             // 2. Test access to the events table
-        //             var eventCount = db.Events.Count();
-        //             Console.WriteLine($"Successfully accessed 'events' table. Total count: {eventCount}");
-        //         }
-        //         else
-        //         {
-        //             Console.WriteLine("Failed to connect to the database.");
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         // Log the error
-        //         Console.WriteLine($"An error occurred while testing the database: {ex.Message}");
-        //     }
-        // }
 
         app.Run();
     }
