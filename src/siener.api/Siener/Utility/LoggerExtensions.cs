@@ -1,5 +1,6 @@
-using System.Text;
 using Serilog.Context;
+using Serilog.Core;
+using Serilog.Core.Enrichers;
 
 namespace Siener.Utility;
 
@@ -15,25 +16,15 @@ public static class LoggerExtensions
     {
         if (args is null) args = new();
         
+        var enrichers = args.Select(kvp => new PropertyEnricher(kvp.Key, kvp.Value)).Cast<ILogEventEnricher>().ToArray();
+        
         using (LogContext.PushProperty("MethodName", methodName))
+        using (LogContext.Push(enrichers))
         {
-            StringBuilder sb = new StringBuilder();
-
-            int count = 0;
-            object[] objArgs = new object[args.Count];
-            foreach (var (key, value) in args)
-            {
-                sb.Append(key + ": {" + key + "}");
-                objArgs[count] = value;
-                count++;
-                if (count != args.Count)
-                    sb.Append(", ");
-            }
-
             if (logType == LogType.Information)
-                logger.LogInformation(message + (args.Count > 0 ? " | " + sb.ToString() : string.Empty), objArgs);
+                logger.LogInformation(message);
             if (logType == LogType.Error)
-                logger.LogError(message + (args.Count > 0 ? " | " + sb.ToString() : string.Empty), objArgs);
+                logger.LogError(message);
         }
     }
 }
