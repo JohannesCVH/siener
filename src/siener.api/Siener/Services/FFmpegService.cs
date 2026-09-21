@@ -18,9 +18,10 @@ public class FFmpegService
         var procStartInfo = new ProcessStartInfo
         {
             FileName = "ffmpeg",
-            Arguments =
-                $"-skip_frame nokey -rtsp_transport tcp -fflags nobuffer -flags low_delay -i \"{cameraConfig.URL}/stream1\" -vf fps=1/4 {camerasPath}/{cameraConfig.Name}/Frames/frame_%04d.jpg",
-                // $"-rtsp_transport tcp -fflags nobuffer -flags low_delay -i \"{cameraConfig.URL}/stream2\" -vf fps=1/4 {camerasPath}/{cameraConfig.Name}/Frames/frame_%04d.jpg",
+            Arguments = 
+                $"-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi" + 
+                $" -skip_frame nokey -rtsp_transport tcp -fflags nobuffer -flags low_delay -i \"{cameraConfig.URL}/stream1\"" + 
+                $" -vf \"fps=1,hwdownload,format=nv12\" -q:v 2 \"{camerasPath}/{cameraConfig.Name}/Frames/frame_%04d.jpg\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
