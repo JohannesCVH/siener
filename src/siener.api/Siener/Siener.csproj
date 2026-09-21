@@ -43,4 +43,10 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  
+  <Target Name="PublishToServer" AfterTargets="Publish" Condition="'$(DeployUser)' != '' And '$(DeployHost)' != ''">
+    <Message Text="Deploying published files to server..." Importance="high" />
+    <Exec Command="rsync -avz --delete &quot;$(PublishDir)&quot; $(DeployUser)@$(DeployHost):~/.applications/Siener/" />
+  </Target>
+
 </Project>
