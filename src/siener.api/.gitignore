@@ -3,3 +3,6 @@ obj
 app
 appsettings.json
 mediamtx.yml
+
+auto.crt
+auto.key
