@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Threading.Channels;
+using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Siener.Data;
@@ -22,8 +22,8 @@ public class EventBackgroundService : IHostedService
     private static readonly Dictionary<string, DetectionTypes> LabelMap = new(StringComparer.OrdinalIgnoreCase)
     {
         { "person", DetectionTypes.Person },
-        { "dog", DetectionTypes.Dog },
-        { "car", DetectionTypes.Car }
+        { "dog",    DetectionTypes.Dog },
+        { "car",    DetectionTypes.Car }
     };
     
     public EventBackgroundService(
@@ -52,7 +52,10 @@ public class EventBackgroundService : IHostedService
             
             camera.FrameWatcher = new FileSystemWatcher(camera.FramePath);
             camera.FrameWatcher.Filter = "*.jpg";
-            camera.FrameWatcher.Created += async (s,e) => channel.Writer.TryWrite(new FrameProcessingRequest(camera.Name, e.FullPath));
+            camera.FrameWatcher.Created += async (s,e) =>
+            {
+                channel.Writer.TryWrite(new FrameProcessingRequest(camera.Name, e.FullPath));
+            };
             camera.FrameWatcher.EnableRaisingEvents = true;
         }
     }
@@ -77,9 +80,8 @@ public class EventBackgroundService : IHostedService
 
     private async Task ProcessFrameAsync(string camera, string filePath, CancellationToken cancellationToken)
     {
-        string methodName = nameof(ProcessEventAsync);
+        string methodName = nameof(ProcessFrameAsync);
         
-        // Console.WriteLine($"Camera: {camera}, File: {filePath}");
         try
         {
             byte[]? buffer = null;
@@ -110,12 +112,9 @@ public class EventBackgroundService : IHostedService
                 return;
             }
 
-            var sw = new Stopwatch();
-            sw.Start();
-            var detections = await _objectDetectionService.DetectAsync(buffer);
-            await ProcessEventAsync(camera, detections, cancellationToken);
+            var detections = await _objectDetectionService.DetectAsync(camera, buffer);
 
-            _logger.LogMessage(LogType.Information, methodName, $"Object detection service responded in: {sw.ElapsedMilliseconds}ms for camera: {camera}");
+            await ProcessEventAsync(camera, detections, cancellationToken);
         }
         catch(Exception ex)
         {
@@ -129,12 +128,11 @@ public class EventBackgroundService : IHostedService
 
         foreach (var detection in detections)
         {
-            if (LabelMap.TryGetValue(detection.Label, out var type))
+            if (LabelMap.TryGetValue(detection.Label, out var type) && detection.Confidence > 0.65)
                 detectedFlags |= (short)type;
         }
 
-
-        if (detectedFlags == (short)DetectionTypes.None)
+        if (detectedFlags == (short)DetectionTypes.None || detectedFlags == (short)DetectionTypes.Car)
         {
             await EndEventAsync(camera, cancellationToken);
             return;
@@ -208,6 +206,22 @@ public class EventBackgroundService : IHostedService
                 {
                     _logger.LogMessage(LogType.Information, methodName, "Detection event started");
                     await dbContext.AddAsync(detectionEvent);
+
+                    if (!string.IsNullOrEmpty(_sharedDataService.FcmToken))
+                    {   
+                        var message = new Message
+                        {
+                            Token = _sharedDataService.FcmToken,
+                            Notification = new Notification
+                            {
+                                Title = $"Detection Event on {camera}",
+                                Body = $"Detected: {((DetectionTypes)detectedFlags).ToString()}"
+                            }
+                        };
+
+                        string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                        _logger.LogMessage(LogType.Information, methodName, response);
+                    }
                 }
 
                 await dbContext.SaveChangesAsync();

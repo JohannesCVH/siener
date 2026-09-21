@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Sinks.OpenSearch;
@@ -63,6 +65,15 @@ internal class Program
             .CreateLogger();
 
         builder.Host.UseSerilog();
+
+        var firebaseKeyPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), 
+            ".siener/firebase-key.json"
+        );
+        FirebaseApp.Create(new AppOptions
+        {
+            Credential = GoogleCredential.FromFile(firebaseKeyPath)
+        });
 
         var app = builder.Build();
         app.MapControllers();
