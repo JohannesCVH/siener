@@ -8,7 +8,7 @@ namespace Siener.Services;
 
 public interface IObjectDetectionService
 {
-    public Task<IEnumerable<ObjectDetectionResponse>> DetectAsync(string camera, byte[] buffer);
+    public Task<IEnumerable<ObjectDetectionResponse>> DetectAsync(Camera camera, byte[] buffer);
 }
 
 public class ObjectDetectionService : IObjectDetectionService
@@ -25,7 +25,7 @@ public class ObjectDetectionService : IObjectDetectionService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<ObjectDetectionResponse>> DetectAsync(string camera, byte[] buffer)
+    public async Task<IEnumerable<ObjectDetectionResponse>> DetectAsync(Camera camera, byte[] buffer)
     {
         string methodName = nameof(DetectAsync);
         
@@ -43,13 +43,13 @@ public class ObjectDetectionService : IObjectDetectionService
 
             _logger.LogMessage(LogType.Information, methodName, $"Object detection service responded in: {sw.ElapsedMilliseconds}ms for camera: {camera}");
 
-            _logger.LogMessage(LogType.Information, methodName, $"[Objects Detected] -> Amount: {results.Count()}", new Dictionary<string, string>() { { "Camera", camera } });
+            _logger.LogMessage(LogType.Information, methodName, $"[Objects Detected] -> Amount: {results.Count()}", new Dictionary<string, string>() { { "Camera", camera.Name } });
             foreach (var detection in results)
             {
                 if (detection.Label == "person" || detection.Label == "dog")
                 {
                     _logger.LogMessage(LogType.Information, methodName, $"[Object detected] -> Label: {detection.Label}, Confidence: {detection.Confidence}", new Dictionary<string, string>() { 
-                        { "Camera", camera },
+                        { "Camera", camera.Name },
                         { "Label", detection.Label },
                         { "Confidence", detection.Confidence.ToString() }
                     });

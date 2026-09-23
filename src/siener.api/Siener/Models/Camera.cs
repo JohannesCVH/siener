@@ -9,4 +9,6 @@ public class Camera
     public Stream OutputStream { get; set; }
     public string FramePath { get; set; }
     public FileSystemWatcher FrameWatcher { get; set; }
+    public bool EventInProgress { get; set; }
+    public byte EventEndFrameCount { get; set; }
 }

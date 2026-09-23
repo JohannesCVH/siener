@@ -15,7 +15,7 @@ public class EventBackgroundService : IHostedService
     private readonly ISharedDataService _sharedDataService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IObjectDetectionService _objectDetectionService;
-    private record FrameProcessingRequest(string Camera, string FilePath);
+    private record FrameProcessingRequest(Camera Camera, string FilePath);
     private readonly List<ChannelWriter<FrameProcessingRequest>> _channelWriters = new();
     private readonly ILogger<EventBackgroundService> _logger;
 
@@ -54,7 +54,7 @@ public class EventBackgroundService : IHostedService
             camera.FrameWatcher.Filter = "*.jpg";
             camera.FrameWatcher.Created += async (s,e) =>
             {
-                channel.Writer.TryWrite(new FrameProcessingRequest(camera.Name, e.FullPath));
+                channel.Writer.TryWrite(new FrameProcessingRequest(camera, e.FullPath));
             };
             camera.FrameWatcher.EnableRaisingEvents = true;
         }
@@ -78,7 +78,7 @@ public class EventBackgroundService : IHostedService
         }
     }
 
-    private async Task ProcessFrameAsync(string camera, string filePath, CancellationToken cancellationToken)
+    private async Task ProcessFrameAsync(Camera camera, string filePath, CancellationToken cancellationToken)
     {
         string methodName = nameof(ProcessFrameAsync);
         
@@ -122,8 +122,10 @@ public class EventBackgroundService : IHostedService
         }
     }
 
-    private async Task ProcessEventAsync(string camera, IEnumerable<ObjectDetectionResponse> detections, CancellationToken cancellationToken)
+    private async Task ProcessEventAsync(Camera camera, IEnumerable<ObjectDetectionResponse> detections, CancellationToken cancellationToken)
     {
+        string methodName = nameof(ProcessEventAsync);
+        
         short detectedFlags = 0;
 
         foreach (var detection in detections)
@@ -134,7 +136,8 @@ public class EventBackgroundService : IHostedService
 
         if (detectedFlags == (short)DetectionTypes.None || detectedFlags == (short)DetectionTypes.Car)
         {
-            await EndEventAsync(camera, cancellationToken);
+            await EndEventAsync(camera, false, cancellationToken);
+
             return;
         }
 
@@ -142,7 +145,7 @@ public class EventBackgroundService : IHostedService
         await StartOrUpdateEventAsync(camera, detectedFlags, cancellationToken);
     }
 
-    private async Task EndEventAsync(string camera, CancellationToken cancellationToken)
+    private async Task EndEventAsync(Camera camera, bool endImmediate, CancellationToken cancellationToken)
     {
         string methodName = nameof(EndEventAsync);
         
@@ -152,15 +155,23 @@ public class EventBackgroundService : IHostedService
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 
-                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null, cancellationToken);
+                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera.Name).FirstOrDefaultAsync(x => x.EndTime == null, cancellationToken);
                 if (detectionEvent is null)
                     return;
 
-                detectionEvent.EndTime = DateTime.UtcNow;
-                await dbContext.SaveChangesAsync(cancellationToken);
+
+                camera.EventEndFrameCount++;
+                _logger.LogMessage(LogType.Information, methodName, $"[Camera -> {camera.Name}] Event end frame count: {camera.EventEndFrameCount}", new Dictionary<string, string>() { { "Camera", camera.Name } });
+                
+                if (camera.EventEndFrameCount > 4)
+                {
+                    detectionEvent.EndTime = DateTime.UtcNow;
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
             }
 
-            _logger.LogMessage(LogType.Information, methodName, $"Ended event for {camera}");
+            camera.EventEndFrameCount = 0;
+            _logger.LogMessage(LogType.Information, methodName, $"[Camera -> {camera.Name}] Event ended", new Dictionary<string, string>() { { "Camera", camera.Name } });
         }
         catch(Exception ex)
         {
@@ -168,7 +179,7 @@ public class EventBackgroundService : IHostedService
         }
     }
 
-    private async Task StartOrUpdateEventAsync(string camera, short detectedFlags, CancellationToken cancellationToken)
+    private async Task StartOrUpdateEventAsync(Camera camera, short detectedFlags, CancellationToken cancellationToken)
     {        
         string methodName = nameof(StartOrUpdateEventAsync);
         
@@ -181,10 +192,10 @@ public class EventBackgroundService : IHostedService
                 bool shouldAdd = false;
                 var currentTime = DateTime.UtcNow;
 
-                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera).FirstOrDefaultAsync(x => x.EndTime == null);
+                var detectionEvent = await dbContext.Events.Where(x => x.Camera == camera.Name).FirstOrDefaultAsync(x => x.EndTime == null);
                 if (detectionEvent is not null && detectionEvent.SessionId != _config.SessionId)
                 {
-                    await EndEventAsync(camera, cancellationToken);
+                    await EndEventAsync(camera, true, cancellationToken);
                     detectionEvent = null;
                 }
                 
@@ -194,7 +205,7 @@ public class EventBackgroundService : IHostedService
                     detectionEvent = new Event
                     {
                         SessionId = _config.SessionId,
-                        Camera = camera,
+                        Camera = camera.Name,
                         StartTime = currentTime,
                         Notified = false
                     };
@@ -204,7 +215,7 @@ public class EventBackgroundService : IHostedService
 
                 if (shouldAdd)
                 {
-                    _logger.LogMessage(LogType.Information, methodName, "Detection event started");
+                    _logger.LogMessage(LogType.Information, methodName, $"[Camera -> {camera.Name}] Event started");
                     await dbContext.AddAsync(detectionEvent);
 
                     if (!string.IsNullOrEmpty(_sharedDataService.FcmToken))
