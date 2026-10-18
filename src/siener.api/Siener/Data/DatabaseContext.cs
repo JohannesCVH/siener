@@ -1,15 +1,10 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using Siener.Data.Entities;
-using Siener.Models;
 
 namespace Siener.Data;
 
 public class DatabaseContext : DbContext
 {
-    // public DbSet<User> Users { get; set; }
-    // public DbSet<PushSubscription> PushSubscriptions { get; set; }
-
     public DbSet<Event> Events { get; set; }
 
     public DatabaseContext(DbContextOptions<DatabaseContext> dbContextOptions) : base(dbContextOptions) { }

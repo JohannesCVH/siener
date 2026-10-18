@@ -33,7 +33,7 @@ internal class Program
         });
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(connectionString));
+        builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(connectionString));
 
         var modelPath = builder.Configuration.GetSection("Configuration")["OnnxLocation"];
         var yolo = new Yolo(new YoloOptions
